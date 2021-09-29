@@ -1,5 +1,4 @@
-#!/usr/bin/perl
-
+#!/usr/bin/env perl
 
 # Copyright 2021 Robin Smidsrød
 #
@@ -20,7 +19,7 @@ use Data::Dumper qw(Dumper);
 use HTTP::Tiny ();
 
 my $http = HTTP::Tiny->new();
-my $webhook_url = 'http://ha.lan.folkeverkstedet.com:8123/api/webhook/3e4d7fb6-b97d-4ad7-8a60-ab154340f835';
+my $webhook_url = $ENV{'OMNIKEY_WEBHOOK_URL'} or die('Please specify OMNIKEY_WEBHOOK_URL');
 my $context = Chipcard::PCSC->new()
     or die "Unable to communicate with pcscd: $Chipcard::PCSC::errno\n";
 

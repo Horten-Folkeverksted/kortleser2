@@ -1,6 +1,6 @@
 { pkgs  ? import <nixos> {} }:
 
-let
+rec {
   omnikey = pkgs.stdenv.mkDerivation {
     pname = "read-omnikey";
     version = "0.1.0";
@@ -16,7 +16,4 @@ let
       runHook postInstall
     '';
   };
-in
-{
-  inherit omnikey;
 }

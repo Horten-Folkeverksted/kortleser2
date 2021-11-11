@@ -1,5 +1,5 @@
 #!/usr/bin/env perl
-
+#
 # Copyright 2021 Robin Smidsrød
 #
 # Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
@@ -23,10 +23,15 @@ my $webhook_url = $ENV{'OMNIKEY_WEBHOOK_URL'} or die('Please specify OMNIKEY_WEB
 my $context = Chipcard::PCSC->new()
     or die "Unable to communicate with pcscd: $Chipcard::PCSC::errno\n";
 
-my @readers = $context->ListReaders();
+my @readers = (
+    grep { /HID OMNIKEY/i } # we're only interested in this reader
+    $context->ListReaders()
+);
+
+print STDERR "Starting up with readers: " . join(", ", @readers) . "\n";
+
 my $reader_states = [
     map { { "reader_name" => $_ } }
-#    grep { /HID OMNIKEY/i }
     @readers
 ];
 
@@ -49,8 +54,13 @@ while ( my $rc = $context->GetStatusChange($reader_states) ) {
         } 
        $rs->{'current_state'} = $rs->{'event_state'};
     }
-    last unless $rc;
+    unless ($rc) {
+        prnit STDERR "Exiting with return code $rc.\n";
+        last;
+    }
 }
+
+exit;
 
 sub read_id {
     my ($reader) = @_;
@@ -72,6 +82,24 @@ sub read_id {
         return;
     }
     emit_id($rx);
+    #beep($card); # not making any sound :(
+    return 1;
+}
+
+sub beep {
+    my ($card) = @_;
+    my $tx = [0xFF, 0x00, 0x40, 0xCF, 0x04, 0x03, 0x00, 0x01, 0x01];
+    my $rx = $card->Transmit($tx);
+    if ( ref $rx ne ref [] ) {
+        warn("Not an array response: $rx\n");
+        return;
+    }
+    my $sw2 = pop @$rx;
+    my $sw1 = pop @$rx;
+    unless ( $sw1 == 0x90 && $sw2 == 0x00 ) {
+        warn("Beep command not understood." . arr2asc([$sw1,$sw2]) . "\n");
+        return;
+    }
     return 1;
 }
 
@@ -95,4 +123,4 @@ sub emit_id {
     return 1;
 }
 
-exit;
+1;

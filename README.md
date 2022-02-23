@@ -11,7 +11,7 @@ nix-build -A omnikey
 ## Ubuntu
 
 ```
-apt install pcscd
+apt install pcscd libpcsc-perl
 
 cat <<EOF | sudo tee /etc/default/read-omnikey
 OMNIKEY_WEBHOOK_URL=http://ha.lan.folkeverkstedet.com:8123/api/webhook/some-uuid

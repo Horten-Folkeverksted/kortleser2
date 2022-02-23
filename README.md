@@ -13,11 +13,11 @@ nix-build -A omnikey
 ```
 apt install pcscd
 
-cat <<<EOF | sudo tee /etc/default/read-omnikey
+cat <<EOF | sudo tee /etc/default/read-omnikey
 OMNIKEY_WEBHOOK_URL=http://ha.lan.folkeverkstedet.com:8123/api/webhook/some-uuid
 EOF
 
-cat <<<EOF | sudo tee /etc/systemd/system/read-omnikey.service
+cat <<EOF | sudo tee /etc/systemd/system/read-omnikey.service
 [Unit]
 Description=read-omnikey
 

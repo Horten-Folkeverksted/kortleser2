@@ -14,10 +14,14 @@ nix-build -A omnikey
 apt install pcscd libpcsc-perl
 
 cat <<EOF | sudo tee /etc/polkit-1/rules.d/read-omnikey.rules
-/* Allow users in fv group to access pcscd without authentication */
+/* Allow users in fv group to access pcscd and cards without authentication */
 polkit.addRule(function(action, subject) {
-    if (action.id == "org.debian.pcsc-lite.access_pcsc" &&
-        subject.isInGroup("fv")) {
+    if ( (
+           action.id == "org.debian.pcsc-lite.access_pcsc"
+           ||
+           action.id == "org.debian.pcsc-lite.access_card"
+         )
+         && subject.isInGroup("fv")) {
         return polkit.Result.YES;
     }
 });
